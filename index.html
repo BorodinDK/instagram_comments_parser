@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Экспорт комментариев в xlsx файл</title>
+	<style>
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	body{
+		font: 14px/1.6em Arial, sans-serif;
+	}
+	h2{
+		font-size: 20px;
+	}
+	body{
+		overflow: hidden;
+		margin: 20px;
+	}
+	input{
+		padding: 5px 10px;
+		margin: 15px 0;
+		width: 100%;
+		display: block;
+		outline: none;
+		box-sizing: border-box;
+	}
+	div{
+		padding: 6px;
+		text-align: center;
+		opacity: 0;
+		transition: all.5s ease;
+	}
+	div.visible{
+		opacity: 1;
+	}
+	</style>
+</head>
+<body>
+	<p>Данная программа позволяет экспортировать список комментариев из поста Instagram в файл table.xlsx лежащий в той же папке что и программа.</p>
+	<input type="text" id="url" placeholder="URL записи в Instagram">
+	<input type="button" value="Экспортировать" onclick="getMediaId(url.value);">
+	<div>Готово</div>
+</body>
+<script>
+var request = require('request');
+var xlsx = require('node-xlsx');
+var fs = require('fs');
+
+var client_id = 'cb8217dc60714ac4a136a49139ac01dc';
+
+var data = [['Номер','Время','Пользователь','Сообщение']];
+
+getMediaId = function(url){
+	if(!url) alert('Заполните поле url');
+    request({
+        url: 'http://instagram.com/publicapi/oembed/?url='+url,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            getComments(body.media_id);
+        }
+    });
+};
+
+getComments = function(media_id){
+    request({
+        url: 'https://api.instagram.com/v1/media/'+media_id+'/comments?client_id='+client_id,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            body.data.forEach(function(item,i){
+            	var date = new Date(parseInt(item.created_time)*1000);
+            	time = date.getHours()+':'+date.getMinutes()+' '+date.getDay()+'.'+date.getMonth()+'.'+date.getFullYear();
+            	data.push([i+1, time, item.from.username, item.text]);
+            })
+			fs.writeFileSync('table.xlsx', xlsx.build([{name: "Table", data: data}]));
+			document.querySelector('div').classList.add('visible');
+        }
+    });
+};
+</script>
+</html>
