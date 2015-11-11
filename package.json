@@ -1,12 +1,10 @@
 {
   "main": "index.html",
-  "name": "nw-demo",
+  "name": "Instagram parser",
   "description": "",
   "version": "0.1.0",
-  "keywords": [ "demo", "node-webkit" ],
   "window": {
     "title": "node-webkit demo",
-    "icon": "link.png",
     "toolbar": false,
     "frame": true,
     "width": 250,
